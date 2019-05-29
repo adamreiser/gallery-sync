@@ -1,6 +1,6 @@
 # Gallery Sync
 
-This script generates a [blueimp Gallery](https://github.com/blueimp/Gallery) index.html from a template using the contents of an images directory. Thumbnails will be automatically generated and placed in a directory defined by the script. The template file is simply the standard blueimp index.html with `<script src="js/demo/demo.js"></script>` removed.
+This script generates a [blueimp Gallery](https://github.com/blueimp/Gallery) index.html from a template using the contents of an images directory. Thumbnails will be automatically generated and placed in a directory defined by the script. The included template file is the default blueimp index.html with `<script src="js/demo/demo.js"></script>` removed and the carousel gallery configured.
 
 ## Note
 
