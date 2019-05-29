@@ -4,7 +4,24 @@ import bs4
 import os
 from PIL import Image
 import magic
+import argparse
 
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-d", type=str, metavar='path',
+                    help="The path to the gallery directory containing \
+                    the images and thumbnails directories.\
+                    (Default: '.')", default='.')
+
+# name? or path?
+parser.add_argument("-i", type=str, metavar='dir',
+                    help="The name of the images directory\
+                    (Default: 'images')", default='.')
+
+# output file path -- the gallery directory (replaces gallery dir)
+
+parser.parse_args()
 
 # gallery directory - should contain idir and tdir
 gdir = '.'
@@ -25,12 +42,15 @@ with open("index.html.template") as inf:
     soup = bs4.BeautifulSoup(inf.read(), "lxml")
 
 links = soup.find('div', id='links')
-m = magic.Magic(mime=True)
 
 for i in image_fnames:
     if not (os.path.exists(os.path.join(gdir, 'thumbnails', i))):
         print("Generating thumbnail for {}".format(i))
-        im = Image.open(os.path.join(idir, i))
+        try:
+            im = Image.open(os.path.join(idir, i))
+        except IOError as e:
+            print(e)
+            continue
         im.thumbnail((tsize, tsize))
         im.save(os.path.join(tdir, i))
     else:
