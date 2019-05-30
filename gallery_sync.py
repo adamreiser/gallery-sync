@@ -1,27 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import bs4
 import os
+import logging
+import bs4
 from PIL import Image
 import magic
-import argparse
 
-
-parser = argparse.ArgumentParser()
-
-parser.add_argument("-d", type=str, metavar='path',
-                    help="The path to the gallery directory containing \
-                    the images and thumbnails directories.\
-                    (Default: '.')", default='.')
-
-# name? or path?
-parser.add_argument("-i", type=str, metavar='dir',
-                    help="The name of the images directory\
-                    (Default: 'images')", default='.')
-
-# output file path -- the gallery directory (replaces gallery dir)
-
-parser.parse_args()
+logging.basicConfig(level=logging.INFO)
 
 # gallery directory - should contain idir and tdir
 gdir = '.'
@@ -42,21 +27,32 @@ with open("index.html.template") as inf:
     soup = bs4.BeautifulSoup(inf.read(), "lxml")
 
 links = soup.find('div', id='links')
+m = magic.Magic(mime=True)
 
 for i in image_fnames:
-    if not (os.path.exists(os.path.join(gdir, 'thumbnails', i))):
-        print("Generating thumbnail for {}".format(i))
+    if not os.path.exists(os.path.join(gdir, 'thumbnails', i)):
         try:
             im = Image.open(os.path.join(idir, i))
         except IOError as e:
-            print(e)
+            logging.warning("Reading: %s: %s", i, e)
             continue
-        im.thumbnail((tsize, tsize))
-        im.save(os.path.join(tdir, i))
-    else:
-        print("Thumbnail exists for {}".format(i))
 
-    print("Adding link for {}".format(i))
+        logging.debug("Generating thumbnail for %s", i)
+
+        im.thumbnail((tsize, tsize))
+        try:
+            im.save(os.path.join(tdir, i))
+        except IOError as e:
+            logging.warning("Saving thumbnail %s: %s", i, e)
+            try:
+                os.unlink(os.path.join(tdir, i))
+            except OSError:
+                pass
+            continue
+    else:
+        logging.debug("Thumbnail exists for %s", i)
+
+    logging.debug("Adding link for %s", i)
 
     new_link = soup.new_tag("a", title=os.path.splitext(i)[0],
                             href="images/{}".format(i))
@@ -66,8 +62,7 @@ for i in image_fnames:
                                                 mime=True), alt=i)
 
     new_link.append(new_img)
-
     links.append(new_link)
 
 with open(os.path.join(gdir, 'index.html'), "w") as outf:
-    outf.write(soup.prettify(formatter='html').encode("UTF-8"))
+    outf.write(soup.prettify(formatter='html'))
