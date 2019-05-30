@@ -42,7 +42,7 @@ for i in image_fnames:
         im.thumbnail((tsize, tsize))
         try:
             im.save(os.path.join(tdir, i))
-        except IOError as e:
+        except (IOError, ValueError) as e:
             logging.warning("Saving thumbnail %s: %s", i, e)
             try:
                 os.unlink(os.path.join(tdir, i))
