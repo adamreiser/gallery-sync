@@ -18,7 +18,7 @@ idir = os.path.join(gdir, 'images')
 tdir = os.path.join(gdir, 'thumbnails')
 
 # max thumbnail width/height
-tsize = 128
+tsize = (128, 128)
 
 image_fnames = [f for f in os.listdir(idir)
                 if os.path.isfile(os.path.join(idir, f))]
@@ -39,7 +39,7 @@ for i in image_fnames:
 
         logging.debug("Generating thumbnail for %s", i)
 
-        im.thumbnail((tsize, tsize))
+        im.thumbnail(tsize)
         try:
             im.save(os.path.join(tdir, i))
         except (IOError, ValueError) as e:
